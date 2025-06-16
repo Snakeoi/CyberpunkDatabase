@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename=css_file_path) }}">
+    <script src="{{ url_for('static', filename='vendor/cookieconsent/cookieconsent.min.js') }}"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% block content %}{% endblock %}
+
+{% if not config['TESTING'] %}
+    {% include 'elements/cookieconsent.html' %}
+{% endif %}
+</body>
+</html>
