@@ -4,6 +4,7 @@ from application import models
 from application.utils import CommonCRUD
 from application.utils.decorators import handle_ma_validation_errors
 from application.utils.schema_serialization import serialize_schema
+from application.extensions import socketio
 
 
 class RolePostSchemaView(MethodView):
@@ -79,12 +80,21 @@ class CharacterRoleIndexView(MethodView):
         )
 
     def post(self, ind):
-        return CommonCRUD.post(
+        response, status = CommonCRUD.post(
             payload_schema=models.CharacterRole.post_schema(),
             model=models.CharacterRole,
             data=request.json,
             response_schema=models.CharacterRole.get_one_schema(),
         )
+        if status == 201:
+            socketio.emit(
+                "character_update",
+                models.Character.get_one_schema().dump(
+                    models.Character.query.get(ind)
+                ),
+                room=f"character_{ind}",
+            )
+        return response, status
 
 class CharacterRoleDetailView(MethodView):
     decorators = [handle_ma_validation_errors]
@@ -97,14 +107,31 @@ class CharacterRoleDetailView(MethodView):
         )
 
     def patch(self, ind, role_id):
-        return CommonCRUD.patch(
+        response = CommonCRUD.patch(
             payload_schema=models.CharacterRole.patch_schema(),
             query=models.CharacterRole.query.filter_by(character_id=ind, id=role_id),
             data=request.json,
             response_schema=models.CharacterRole.get_one_schema(),
         )
+        socketio.emit(
+            "character_update",
+            models.Character.get_one_schema().dump(
+                models.Character.query.get(ind)
+            ),
+            room=f"character_{ind}",
+        )
+        return response
 
     def delete(self, ind, role_id):
-        return CommonCRUD.delete(
+        response, status = CommonCRUD.delete(
             query=models.CharacterRole.query.filter_by(character_id=ind, id=role_id),
         )
+        if status == 204:
+            socketio.emit(
+                "character_update",
+                models.Character.get_one_schema().dump(
+                    models.Character.query.get(ind)
+                ),
+                room=f"character_{ind}",
+            )
+        return response, status

@@ -4,6 +4,7 @@ from application import models
 from application.utils import CommonCRUD
 from application.utils.decorators import handle_ma_validation_errors
 from application.utils.schema_serialization import serialize_schema
+from application.extensions import socketio
 
 
 class CharacterPostSchemaView(MethodView):
@@ -28,12 +29,20 @@ class CharactersIndexView(MethodView):
         )
 
     def post(self):
-        return CommonCRUD.post(
+        response, status = CommonCRUD.post(
             payload_schema=models.Character.post_schema(),
             model=models.Character,
             data=request.json,
             response_schema=models.Character.get_one_schema(),
         )
+        if status == 201:
+            data = response.get_json()
+            socketio.emit(
+                "character_update",
+                data,
+                room=f"character_{data['id']}",
+            )
+        return response, status
 
 class CharacterDetailView(MethodView):
     decorators = [handle_ma_validation_errors]
@@ -45,12 +54,20 @@ class CharacterDetailView(MethodView):
         )
 
     def patch(self, ind):
-        return CommonCRUD.patch(
+        response = CommonCRUD.patch(
             payload_schema=models.Character.patch_schema(),
             query=models.Character.query.filter_by(id=ind),
             data=request.json,
             response_schema=models.Character.get_one_schema(),
         )
+        socketio.emit(
+            "character_update",
+            models.Character.get_one_schema().dump(
+                models.Character.query.get(ind)
+            ),
+            room=f"character_{ind}",
+        )
+        return response
 
     def delete(self, ind):
         return CommonCRUD.delete(
