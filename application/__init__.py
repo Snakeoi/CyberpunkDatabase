@@ -7,6 +7,7 @@ from .extensions import setup_extensions
 from .blueprints import setup_blueprints
 from .injects import setup_injects
 from . import utils
+from .socketio_events import register_socketio_events
 
 CONFIGS = {"basic": "config.toml", "testing": "config.test.toml"}
 
@@ -19,6 +20,7 @@ def create_app(mode="basic"):
     app.config["BASEDIR"] = os.path.abspath(os.path.dirname(__file__))
 
     setup_extensions(app)
+    register_socketio_events()
 
     setup_injects(app)
 

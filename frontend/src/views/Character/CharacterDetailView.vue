@@ -15,6 +15,7 @@ import {QuillEditor} from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import Tabs from "@/components/Tabs/Tabs.vue";
 import Tab from "@/components/Tabs/Tab.vue";
+import { io } from "socket.io-client";
 
 const toasterStore = useToasterStore();
 
@@ -33,6 +34,7 @@ const activeTab = ref(tabs.value[1]);
 
 
 const route = useRoute();
+const socket = io();
 const isLoading = ref(true);
 const showNotes = ref(false);
 
@@ -116,6 +118,12 @@ watch(character, async () => {
 }, {deep: true});
 
 onBeforeMount(async () => {
+  socket.emit('join_character', {character_id: route.params.id});
+  socket.on('character_update', data => {
+    character.value = data;
+    characterOriginal.value = {...data};
+    characterNotes.value = data.notes;
+  });
   await getCharacter();
   await getSkills();
   await getRoles();

@@ -16,7 +16,8 @@
     "pinia": "^2.1.7",
     "quill": "^2.0.3",
     "vue": "^3.4.29",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.3.3",
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
