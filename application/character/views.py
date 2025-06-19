@@ -54,6 +54,7 @@ class CharacterDetailView(MethodView):
         )
 
     def patch(self, ind):
+        print(request.json.get('humanity'))
         response = CommonCRUD.patch(
             payload_schema=models.Character.patch_schema(),
             query=models.Character.query.filter_by(id=ind),

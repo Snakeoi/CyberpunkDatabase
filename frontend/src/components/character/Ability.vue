@@ -29,34 +29,49 @@ const emit = defineEmits([
 ]);
 
 const inputValue = ref(props.modelValue);
+const pendingValue = ref(0);
+let timeoutId = null;
 
 watch(() => props.modelValue, (newValue) => {
   inputValue.value = newValue;
 });
 
-function updateValue() {
-  emit('update:modelValue', inputValue.value);
+function emitValue() {
+  if (pendingValue.value !== 0) {
+    inputValue.value += pendingValue.value;
+    emit('update:modelValue', inputValue.value);
+    pendingValue.value = 0;
+  }
+}
+
+function scheduleEmit() {
+  clearTimeout(timeoutId);
+  timeoutId = setTimeout(() => {
+    emitValue();
+  }, 1000);
 }
 
 const changeValue = (diff) => {
-  inputValue.value += diff;
-  updateValue();
-}
+  pendingValue.value += diff;
+  scheduleEmit();
+};
 </script>
 
 <template>
 <div class="level-item has-text-centered">
   <div>
     <p class="heading">{{ heading }}</p>
-    <p class="title is-4" :class="props.class">{{ inputValue }}</p>
-    <span v-if="props.editableAt.includes(sheetMode)" class="has-text-primary">
-      <i @click=changeValue(-1) class="icon-minus-square is-clickable pr-4"></i>
-      <i @click=changeValue(1) class="icon-plus-square is-clickable"></i>
+    <p class="title is-4" :class="props.class">{{ inputValue + pendingValue }}</p>
+    <span v-if="props.editableAt.includes(sheetMode)" @mouseleave="emitValue" class="has-text-primary">
+      <i
+        @click="changeValue(-1)"
+        class="icon-minus-square is-clickable pr-4">
+      </i>
+      <i
+        @click="changeValue(1)"
+        class="icon-plus-square is-clickable">
+      </i>
     </span>
   </div>
 </div>
 </template>
-
-<style scoped>
-
-</style>
