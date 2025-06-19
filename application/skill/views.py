@@ -45,6 +45,7 @@ class SkillIndexView(MethodView):
             payload_schema=models.Skills.post_schema(),
             model=models.Skills,
             data=request.json,
+            response_schema=models.Skills.get_one_schema(),
         )
 
 class SkillDetailView(MethodView):
@@ -58,9 +59,10 @@ class SkillDetailView(MethodView):
 
     def patch(self, ind):
         return CommonCRUD.patch(
-            schema=models.Skills.patch_schema(),
+            payload_schema=models.Skills.patch_schema(),
             query=models.Skills.query.filter_by(id=ind),
             data=request.json,
+            response_schema=models.Skills.get_one_schema(),
         )
 
     def delete(self, ind):
