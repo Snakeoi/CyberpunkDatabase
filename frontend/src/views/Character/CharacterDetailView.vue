@@ -5,14 +5,13 @@ import {useRoute} from 'vue-router'
 import Input from "@/components/form/Input.vue";
 import ConditionalLoader from "@/components/loader/ConditionalLoader.vue";
 import {useToasterStore} from "@/stores/toaster.js";
-import Abilities from "@/components/character/Abilities.vue";
-import Ability from "@/components/character/Ability.vue";
-import DataTable from "@/components/common/data_table/DataTable.vue";
-import SearchInput from "@/components/common/SearchInput.vue";
+import CharacterNotes from "@/components/character/detail/CharacterNotes.vue";
+import CharacterAbilities from "@/components/character/detail/CharacterAbilities.vue";
+import CharacterSkills from "@/components/character/detail/CharacterSkills.vue";
+import CharacterRoles from "@/components/character/detail/CharacterRoles.vue";
+import CharacterPsychHealth from "@/components/character/detail/CharacterPsychHealth.vue";
 import {sheetModes} from "@/enums.js";
 import router from "@/router/index.js";
-import {QuillEditor} from '@vueup/vue-quill'
-import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import Tabs from "@/components/Tabs/Tabs.vue";
 import Tab from "@/components/Tabs/Tab.vue";
 import { io } from "socket.io-client";
@@ -364,202 +363,52 @@ const deleteCharacterRole = async (role) => {
            @click.native="activeTab = tab"/>
     </Tabs>
 
-
-    <div class="content" v-if="activeTab === tabs[0]">
-      <div>
-        <div class="buttons has-addons is-right">
-          <button :disabled="!isNotesChanged" class="button is-primary" @click="updateNotes">
-            <i class="icon-save"></i> Zapisz notatki
-          </button>
-          <button class="button is-warning" :disabled="!isNotesChanged" @click="characterNotes = character.notes">
-            <i class="icon-remove"></i> Anuluj zmiany
-          </button>
-        </div>
-
-        <QuillEditor
-             theme="snow"
-             :content-type="'html'"
-             :placeholder="'Opis postaci'"
-             v-model:content="characterNotes"
-        />
-      </div>
-    </div>
+    <CharacterNotes
+      v-if="activeTab === tabs[0]"
+      :notes="characterNotes"
+      :isChanged="isNotesChanged"
+      @update:notes="val => characterNotes.value = val"
+      @save="updateNotes"
+      @cancel="characterNotes.value = character.notes"
+    />
 
     <div v-if="activeTab === tabs[1]">
-      <div class="box">
-        <Abilities>
-          <Ability v-model="character.int" :sheetMode=sheetMode heading="INT"/>
-          <Ability v-model="character.ref" :sheetMode=sheetMode heading="REF"/>
-          <Ability v-model="character.dex" :sheetMode=sheetMode heading="ZW"/>
-          <Ability v-model="character.tech" :sheetMode=sheetMode heading="TECH"/>
-          <Ability v-model="character.cool" :sheetMode=sheetMode heading="CHA"/>
-          <Ability v-model="character.will" :sheetMode=sheetMode heading="SW"/>
-          <Ability v-model="character.body" :sheetMode=sheetMode heading="BC"/>
-          <Ability v-model="character.luck" :sheetMode=sheetMode heading="SZ"/>
-          <Ability v-model="character.move" :sheetMode=sheetMode heading="RUCH"/>
-        </Abilities>
-        <p class="has-text-centered">Koszt zdolności: <b>{{ characterAbilitiesCost }}</b></p>
-      </div>
+      <CharacterAbilities
+        :character="character"
+        :sheetMode="sheetMode"
+        :cost="characterAbilitiesCost"/>
+
       <div class="columns">
-      <div class="column">
-        <div class="box">
-          <h2 class="title is-4">Umiejętności</h2>
-          <p class="has-text-right">Koszt umiejętności: <b>{{ summarySkillsCost }}</b></p>
-          <table class="table is-fullwidth">
-            <thead>
-            <tr>
-              <th>Nazwa</th>
-              <th>Dziedziczy</th>
-              <th>Poziom</th>
-              <th>Cecha</th>
-              <th>Baza</th>
-              <th v-if="[sheetModes.edit, sheetModes.deleting].includes(sheetMode)">Akcje</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="skill in orderedCharacterSkills">
-              <td>
-                {{ skill.skill.name }}
-                <span v-if="skill.skill.cost_multiplier > 1" class="has-text-warning">
-                  (x{{ skill.skill.cost_multiplier }})
-                </span>
-              </td>
-              <td>{{ skill.skill.inherit.toUpperCase() }}</td>
-              <td>{{ skill.level }}</td>
-              <td>{{ skill.ability_level }}</td>
-              <td><b>{{ skill.base }}</b></td>
-              <td v-if="sheetMode === sheetModes.edit" class="has-text-primary">
-                <i @click=updateCharacterSkill(skill,-1) class="icon-minus-square is-clickable pr-4"></i>
-                <i @click=updateCharacterSkill(skill,1) class="icon-plus-square is-clickable"></i>
-              </td>
-              <td v-if="sheetMode === sheetModes.deleting" class="has-text-danger">
-                <i @click=deleteCharacterSkill(skill) class="icon-trash is-clickable"></i>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-
-          <div class="field" v-if="sheetMode === sheetModes.edit">
-            <label class="label">Dodaj umiejętność</label>
-            <div class="my-3">
-              <div class="field is-grouped">
-                <div class="field">
-                  <label class="label">Szukaj</label>
-                  <SearchInput v-model="skillsSerach"/>
-                </div>
-                <div class="field">
-                  <label class="label">Poziom początkowy</label>
-                  <Input v-model="newSkillInitialLevel" type="number" min="0" max="10"/>
-                </div>
-              </div>
-            </div>
-            <DataTable
-              :storageName="'skills'"
-              :data="filteredSkills"
-              :onRowClick="addCharacterSkill"
-              :structure="[
-                {
-                  key: 'name',
-                  title: 'Nazwa',
-                  type: 'string',
-                  isSortable: true
-                },
-                {
-                  key: 'inherit',
-                  title: 'Zdolność',
-                  type: 'string',
-                  isSortable: true
-                },
-                {
-                  key: 'cost_multiplier',
-                  title: 'Mnożnik kosztu',
-                  type: 'string',
-                  isSortable: true
-                },
-              ]"
+        <div class="column">
+          <CharacterSkills
+            :ordered-skills="orderedCharacterSkills"
+            :filtered-skills="filteredSkills"
+            :skills-search="skillsSerach"
+            :new-skill-level="newSkillInitialLevel"
+            :sheet-mode="sheetMode"
+            :summary-cost="summarySkillsCost"
+            @update:skillsSearch="val => skillsSerach.value = val"
+            @update:newSkillLevel="val => newSkillInitialLevel.value = val"
+            @addSkill="addCharacterSkill"
+            @updateSkill="updateCharacterSkill"
+            @deleteSkill="deleteCharacterSkill"
           />
-          </div>
+        </div>
+        <div class="column">
+          <CharacterPsychHealth :character="character" :sheetMode="sheetMode" />
 
+          <CharacterRoles
+            :ordered-roles="orderedCharacterRoles"
+            :filtered-roles="filteredRoles"
+            :roles-search="rolesSerach"
+            :sheet-mode="sheetMode"
+            @update:rolesSearch="val => rolesSerach.value = val"
+            @addRole="addCharacterRole"
+            @updateRole="updateCharacterRole"
+            @deleteRole="deleteCharacterRole"
+          />
         </div>
       </div>
-      <div class="column">
-
-        <div class="box">
-          <h2 class="title is-4">Psychika</h2>
-          <Abilities>
-            <Ability v-model="character.humanity" :editableAt="['play', 'edit']" :sheetMode=sheetMode heading="Człowieczeństwo"/>
-            <Ability v-model="character.emp_base" class="subtitle" :sheetMode=sheetMode heading="EMP baza"/>
-            <Ability v-model="character.emp_debuff" class="subtitle" :class="{'has-text-danger': character.emp_debuff !== 0}" heading="EMP kara"/>
-            <Ability v-model="character.emp" heading="EMP"/>
-          </Abilities>
-        </div>
-
-        <div class="box">
-          <h2 class="title is-4">Zdrowie</h2>
-          <Abilities>
-            <Ability v-model="character.health" :editableAt="['play', 'edit']" :sheetMode="sheetMode" heading="Zdrowie"/>
-            <Ability v-model="character.health_base" heading="Max. zdrowie"/>
-            <Ability v-model="character.serious_wounds" heading="Poważne rany"/>
-            <Ability v-model="character.survivability" heading="Przeżywalność"/>
-          </Abilities>
-        </div>
-
-        <div class="box">
-          <h2 class="title is-4">Role</h2>
-          <table class="table is-fullwidth">
-            <thead>
-            <tr>
-              <th>Nazwa</th>
-              <th>Zdolność specjalna</th>
-              <th>Poziom</th>
-              <th v-if="[sheetModes.edit, sheetModes.deleting].includes(sheetMode)">Akcje</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="role in orderedCharacterRoles">
-              <td>{{ role.role.name }}</td>
-              <td>{{ role.role.special_ability }}</td>
-              <td><b>{{ role.level }}</b></td>
-              <td v-if="sheetMode === sheetModes.edit" class="has-text-primary">
-                <i @click=updateCharacterRole(role,-1) class="icon-minus-square is-clickable pr-4"></i>
-                <i @click=updateCharacterRole(role,1) class="icon-plus-square is-clickable"></i>
-              </td>
-              <td v-if="sheetMode === sheetModes.deleting" class="has-text-danger">
-                <i @click=deleteCharacterRole(role) class="icon-trash is-clickable"></i>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-
-          <div class="field" v-if="sheetMode === sheetModes.edit">
-            <label class="label">Dodaj rolę</label>
-            <div class="my-3">
-              <SearchInput v-model="rolesSerach"/>
-            </div>
-            <DataTable
-              :storageName="'skills'"
-              :data="filteredRoles"
-              :onRowClick="addCharacterRole"
-              :structure="[
-                {
-                  key: 'name',
-                  title: 'Nazwa',
-                  type: 'string',
-                  isSortable: true
-                },
-                {
-                  key: 'special_ability',
-                  title: 'Zdolność specjalna',
-                  type: 'string',
-                  isSortable: true
-                },
-              ]"
-          />
-          </div>
-
-        </div>
-      </div>
-    </div>
     </div>
 
   </ConditionalLoader>
