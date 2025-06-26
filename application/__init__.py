@@ -32,6 +32,7 @@ def create_app(mode="basic"):
             "skill": ("skill",),
             "role": ("role",),
             "character_generator": ("character_generator",),
+            "bank": ("bank",),
         },
     )
 

@@ -62,6 +62,8 @@ class Character(db.Model):
             [role.role.name for role in self.character_roles]
         )
 
+    def get_balance(self):
+        return sum(entry.amount for entry in self.bank_account_entries)
 
     character_roles = db.relationship(
         'CharacterRole',
@@ -73,6 +75,12 @@ class Character(db.Model):
         'CharacterSkills',
         back_populates='character',
         overlaps="skills,character",
+        cascade="all, delete-orphan"
+    )
+    bank_account_entries = db.relationship(
+        'BankAccountEntry',
+        back_populates='character',
+        overlaps="bank_account_entries,character",
         cascade="all, delete-orphan"
     )
 
@@ -196,6 +204,23 @@ class Character(db.Model):
             roles_list = ma.Method('get_character_roles_names')
 
         return CharacterGetAllSchema()
+
+    @classmethod
+    def get_balance_schema(cls) -> ma.SQLAlchemySchema:
+        class CharacterBalanceSchema(ma.SQLAlchemySchema):
+            class Meta:
+                model = cls
+                load_instance = True
+                include_fk = True
+                include_relationships = True
+
+            def get_balance(self, obj):
+                return obj.get_balance()
+
+            id = ma.auto_field()
+            balance = ma.Method('get_balance')
+
+        return CharacterBalanceSchema()
 
 class Role(db.Model):
     __tablename__ = "roles"
@@ -407,7 +432,6 @@ class Skills(db.Model):
 
         return SkillsPatchSchema()
 
-
 class CharacterSkills(db.Model):
     __tablename__ = "character_skills"
     id = db.Column(db.Integer, primary_key=True)
@@ -501,3 +525,72 @@ class CharacterSkills(db.Model):
             level = ma.auto_field()
 
         return CharacterSkillsPatchSchema()
+
+class BankAccountEntry(db.Model):
+    __tablename__ = "bank_account_entries"
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now(), nullable=False)
+    character_id = db.Column(db.Integer, db.ForeignKey('character.id'), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+
+    character = db.relationship('Character', back_populates='bank_account_entries', overlaps="bank_account_entries,character")
+
+    @classmethod
+    def get_all_schema(cls) -> ma.SQLAlchemySchema:
+        class BankAccountEntryGetAllSchema(ma.SQLAlchemySchema):
+            class Meta:
+                model = cls
+                load_instance = True
+                include_fk = True
+                include_relationships = True
+
+            id = ma.auto_field()
+            timestamp = ma.auto_field()
+            amount = ma.auto_field()
+            description = ma.auto_field()
+
+        return BankAccountEntryGetAllSchema()
+
+    @classmethod
+    def get_one_schema(cls) -> ma.SQLAlchemySchema:
+        class BankAccountEntryGetOneSchema(ma.SQLAlchemySchema):
+            class Meta:
+                model = cls
+                load_instance = True
+                include_fk = True
+                include_relationships = True
+
+            id = ma.auto_field()
+            timestamp = ma.auto_field()
+            amount = ma.auto_field()
+            description = ma.auto_field()
+
+        return BankAccountEntryGetOneSchema()
+
+    @classmethod
+    def post_schema(cls) -> ma.SQLAlchemySchema:
+        class BankAccountEntryPostSchema(ma.SQLAlchemySchema):
+            class Meta:
+                model = cls
+                include_fk = True
+                include_relationships = True
+
+            character_id = ma.auto_field(required=True)
+            amount = ma.auto_field(required=True)
+            description = ma.auto_field()
+
+        return BankAccountEntryPostSchema()
+
+    @classmethod
+    def patch_schema(cls) -> ma.SQLAlchemySchema:
+        class BankAccountEntryPatchSchema(ma.SQLAlchemySchema):
+            class Meta:
+                model = cls
+                include_fk = True
+                include_relationships = True
+
+            amount = ma.auto_field()
+            description = ma.auto_field()
+
+        return BankAccountEntryPatchSchema()
