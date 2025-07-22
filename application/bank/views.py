@@ -8,7 +8,7 @@ class BankAccountEntryPostSchemaView(MethodView):
     def get(self):
         return jsonify(serialize_schema(models.BankAccountEntry.post_schema()))
 
-class BankAccountEntryIndexView(MethodView):
+class BankAccountEntryCharacterIndexView(MethodView):
     def get(self, character_id):
         return CommonCRUD.get_all(
             response_schema=models.BankAccountEntry.get_all_schema(),
@@ -16,6 +16,7 @@ class BankAccountEntryIndexView(MethodView):
             .order_by(models.BankAccountEntry.timestamp.desc()),
         )
 
+class BankAccountEntryIndexView(MethodView):
     def post(self):
         return CommonCRUD.post(
             payload_schema=models.BankAccountEntry.post_schema(),
@@ -45,8 +46,8 @@ class BankAccountEntryDetailView(MethodView):
         )
 
 class BankAccountBalanceView(MethodView):
-    def get(self, ind):
+    def get(self, character_id):
         return CommonCRUD.get_one(
             response_schema=models.Character.get_balance_schema(),
-            query=models.Character.query.filter_by(id=ind),
+            query=models.Character.query.filter_by(id=character_id),
         )

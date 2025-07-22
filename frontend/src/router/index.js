@@ -3,7 +3,7 @@ import HomeView from "@/views/HomeView.vue";
 import NotFound from "@/views/NotFound.vue";
 import CharacterIndexView from "@/views/Character/CharacterIndexView.vue";
 import CharacterCreateView from "@/views/Character/CharacterCreateView.vue";
-import CharacterDetailView from "@/views/Character/CharacterDetailView.vue";
+import CharacterDetailView from "@/views/Character/CharacterDetail/CharacterDetailView.vue";
 import SkillCreateView from "@/views/Abilities/SkillCreateView.vue";
 import SkillDetailView from "@/views/Abilities/SkillDetailView.vue";
 import SkillIndexView from "@/views/Abilities/SkillIndexView.vue";

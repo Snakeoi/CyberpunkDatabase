@@ -1,6 +1,7 @@
 import math
 from enum import StrEnum
 from sqlalchemy.orm import validates
+from marshmallow import validate
 
 from .extensions import db
 from .extensions import ma
@@ -577,7 +578,10 @@ class BankAccountEntry(db.Model):
                 include_relationships = True
 
             character_id = ma.auto_field(required=True)
-            amount = ma.auto_field(required=True)
+            amount = ma.auto_field(required=True, validate=[
+                validate.Range(min=-10000000000, max=10000000000),
+                validate.NoneOf([0], error="Kwota nie może być zerem.")
+            ])
             description = ma.auto_field()
 
         return BankAccountEntryPostSchema()

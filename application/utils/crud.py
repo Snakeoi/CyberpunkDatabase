@@ -1,12 +1,18 @@
 from typing import Any
 
 from flask import jsonify, abort
+from marshmallow.exceptions import ValidationError
 
 from application.extensions import db
 from application.extensions import ma
 
 
 class CommonCRUD:
+    @classmethod
+    def parse_shema_messages(cls, e: ValidationError) -> dict[str, list[str]]:
+        """Parse validation error messages from Marshmallow."""
+        return {'errors': [message for messages_set in e.messages.values() for message in messages_set]}
+
     @classmethod
     def get_all(cls, response_schema: "ma.Schema", query: "db.Query"):
         return jsonify(response_schema.dump(query.all(), many=True))
@@ -24,7 +30,11 @@ class CommonCRUD:
         if response_schema is None:
             response_schema = payload_schema
 
-        instance = model(**payload_schema.load(data))
+        try:
+            instance = model(**payload_schema.load(data))
+        except ValidationError as e:
+            return cls.parse_shema_messages(e), 400
+
         db.session.add(instance)
         db.session.commit()
 
@@ -38,7 +48,10 @@ class CommonCRUD:
         instance = query.one_or_none()
         if instance is None:
             abort(404)
-        data = payload_schema.load(data)
+        try:
+            data = payload_schema.load(data)
+        except ValidationError as e:
+            return cls.parse_shema_messages(e), 400
         for key in data.keys():
             setattr(instance, key, data[key])
         db.session.commit()

@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
   title: {
-    type: Number,
+    type: String,
     required: true,
   },
   isActive: {
