@@ -14,7 +14,7 @@ const links = ref([
     routeName: 'skill-index'
   },
   {
-    text: 'Dokumentacja',
+    text: 'Zasady',
     icon: 'icon-book',
     routeName: 'docs-index'
   }

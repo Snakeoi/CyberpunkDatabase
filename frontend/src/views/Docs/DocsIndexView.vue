@@ -111,32 +111,32 @@ onMounted(() => {
 <template>
   <section class="docs-section">
     <div class="columns is-multiline">
-      <div class="column is-12-tablet is-3-desktop">
-        <aside class="menu">
-          <p class="menu-label">
-            Dokumenty
-          </p>
-          <ul class="menu-list">
-            <li v-for="document in documents" :key="document.slug">
-              <a
-                  :class="{'is-active': selectedSlug === document.slug}"
-                  @click.prevent="loadDocument(document.slug)"
-                  href="#"
-              >
-                {{ document.title }}
-              </a>
-            </li>
-          </ul>
-        </aside>
+      <div class="column is-narrow">
+        <nav class="panel is-primary">
+          <a
+              v-for="document in documents" :key="document.slug"
+              :class="{'is-active': selectedSlug === document.slug}"
+              @click.prevent="loadDocument(document.slug)"
+              href="#"
+              class="panel-block"
+          >
+            <span class="panel-icon">
+              <i class="icon-file" aria-hidden="true"></i>
+            </span>
+            {{ document.title }}
+          </a>
+        </nav>
       </div>
-      <div class="column is-12-tablet" :class="{'is-6-desktop': isTocVisible, 'is-9-desktop': !isTocVisible}">
+      <div class="column">
         <div class="content-header">
           <button
-              class="button is-small is-light toc-button"
+              class="button is-large is-info toc-button"
               type="button"
               @click="isTocVisible = !isTocVisible"
           >
-            {{ isTocVisible ? 'Ukryj spis treści' : 'Pokaż spis treści' }}
+
+            <i v-if="isTocVisible" class="icon-list-alt"></i>
+            <i v-if="!isTocVisible" class="icon-list-alt"></i>
           </button>
         </div>
         <div v-if="loadError" class="notification is-danger">
@@ -145,11 +145,11 @@ onMounted(() => {
         <div v-else-if="isLoading" class="has-text-centered">
           Ładowanie...
         </div>
-        <article v-else class="content" v-html="htmlContent" />
+        <article v-else class="content" v-html="htmlContent"/>
       </div>
       <div
           v-if="isTocVisible"
-          class="column is-12-tablet is-3-desktop"
+          class="column is-narrow"
       >
         <div class="toc-container">
           <div class="toc-header">
