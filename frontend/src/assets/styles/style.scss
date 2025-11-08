@@ -1,0 +1,36 @@
+:root {
+  --bulma-primary-h: 14deg;
+  --bulma-scheme-h: 227;
+  --bulma-scheme-s: 7%;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsla(var(--bulma-primary-h), var(--bulma-primary-s), var(--bulma-primary-l), 1);
+}
+
+::selection {
+  background: hsla(var(--bulma-primary-h), var(--bulma-primary-s), var(--bulma-primary-l), 0.5);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: hsla(var(--bulma-primary-h), var(--bulma-primary-s), var(--bulma-primary-l), 0.5);
+  text-shadow: none;
+}
+
+.is-100vh {
+  min-height: 100vh;
+}
+
+.is-100prc-width {
+  width: 100%;
+}
+

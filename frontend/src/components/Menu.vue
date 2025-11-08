@@ -1,6 +1,7 @@
 <script setup>
 import {useUserStore} from "@/stores/user.js";
 import Theme from "@/components/Theme.vue";
+import JSLogo from "@/components/JSLogo.vue";
 
 const userStore = useUserStore();
 </script>
@@ -9,7 +10,7 @@ const userStore = useUserStore();
 <nav class="navbar" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <RouterLink :to="{name: 'home'}" class="navbar-item">
-        <img alt="logo" src="/images/logo.svg" style="width: 80px">
+        <JSLogo width="40px"/>
     </RouterLink>
 
     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">

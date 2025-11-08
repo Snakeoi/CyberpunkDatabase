@@ -1,5 +1,6 @@
 <script setup>
 import {onMounted, ref} from "vue";
+import {marked} from "marked";
 import {readResource} from "@/assets/utils/axios/crud.js";
 
 const documents = ref([]);
@@ -7,92 +8,69 @@ const selectedSlug = ref(null);
 const htmlContent = ref("");
 const isLoading = ref(false);
 const loadError = ref(null);
+const tocItems = ref([]);
+const isTocVisible = ref(true);
 
-const convertMarkdownToHtml = (markdown) => {
-  const escapeHtml = (value) =>
-    value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
+const renderMarkdownWithToc = (markdown) => {
+  const renderer = new marked.Renderer();
+  const headings = [];
+  const slugCounts = new Map();
 
-  const applyInlineFormatting = (value) => {
-    let formatted = escapeHtml(value);
-    formatted = formatted.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    formatted = formatted.replace(/\*(.+?)\*/g, "<em>$1</em>");
-    formatted = formatted.replace(/`(.+?)`/g, "<code>$1</code>");
-    return formatted;
+  const extractPlainText = (tokens) => {
+    if (!Array.isArray(tokens)) {
+      return "";
+    }
+
+    return tokens
+        .map((token) => {
+          if (typeof token?.text === "string") {
+            return token.text;
+          }
+
+          if (Array.isArray(token?.tokens)) {
+            return extractPlainText(token.tokens);
+          }
+
+          return "";
+        })
+        .join("");
   };
 
-  const lines = markdown.split(/\r?\n/);
-  const htmlLines = [];
-  let inUnorderedList = false;
-  let inOrderedList = false;
+  const slugify = (value) => {
+    const baseSlug = value
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-") || "section";
 
-  const closeLists = () => {
-    if (inUnorderedList) {
-      htmlLines.push("</ul>");
-      inUnorderedList = false;
-    }
-    if (inOrderedList) {
-      htmlLines.push("</ol>");
-      inOrderedList = false;
-    }
+    const occurrence = slugCounts.get(baseSlug) ?? 0;
+    slugCounts.set(baseSlug, occurrence + 1);
+    return occurrence ? `${baseSlug}-${occurrence}` : baseSlug;
   };
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  renderer.heading = (token) => {
+    const headingDepth = token?.depth ?? 1;
+    const headingText = token?.text ?? "";
+    const plainText = (extractPlainText(token?.tokens) || headingText)
+        .toString()
+        .trim();
+    const slug = slugify(plainText);
+    const inlineHtml = marked.parseInline(headingText);
 
-    if (!trimmed) {
-      closeLists();
-      continue;
-    }
+    headings.push({
+      id: slug,
+      text: plainText,
+      level: headingDepth,
+    });
 
-    if (trimmed.startsWith("### ")) {
-      closeLists();
-      htmlLines.push(`<h3>${applyInlineFormatting(trimmed.slice(4))}</h3>`);
-      continue;
-    }
+    return `<h${headingDepth} id="${slug}">${inlineHtml}</h${headingDepth}>`;
+  };
 
-    if (trimmed.startsWith("## ")) {
-      closeLists();
-      htmlLines.push(`<h2>${applyInlineFormatting(trimmed.slice(3))}</h2>`);
-      continue;
-    }
-
-    if (trimmed.startsWith("# ")) {
-      closeLists();
-      htmlLines.push(`<h1>${applyInlineFormatting(trimmed.slice(2))}</h1>`);
-      continue;
-    }
-
-    if (/^(\*|\+|-)\s+/.test(trimmed)) {
-      if (!inUnorderedList) {
-        closeLists();
-        htmlLines.push("<ul>");
-        inUnorderedList = true;
-      }
-      const content = trimmed.replace(/^(\*|\+|-)\s+/, "");
-      htmlLines.push(`<li>${applyInlineFormatting(content)}</li>`);
-      continue;
-    }
-
-    if (/^\d+\.\s+/.test(trimmed)) {
-      if (!inOrderedList) {
-        closeLists();
-        htmlLines.push("<ol>");
-        inOrderedList = true;
-      }
-      const content = trimmed.replace(/^\d+\.\s+/, "");
-      htmlLines.push(`<li>${applyInlineFormatting(content)}</li>`);
-      continue;
-    }
-
-    closeLists();
-    htmlLines.push(`<p>${applyInlineFormatting(trimmed)}</p>`);
-  }
-
-  closeLists();
-  return htmlLines.join("\n");
+  const html = marked.parse(markdown, {renderer});
+  tocItems.value = headings;
+  return html;
 };
 
 const loadDocuments = async () => {
@@ -114,10 +92,12 @@ const loadDocument = async (slug) => {
   try {
     selectedSlug.value = slug;
     const response = await readResource(`/docs/${slug}`);
-    htmlContent.value = convertMarkdownToHtml(response.data.content ?? "");
+    const markdown = response.data.content ?? "";
+    htmlContent.value = renderMarkdownWithToc(markdown);
   } catch (error) {
     loadError.value = "Nie udało się pobrać treści dokumentu.";
     htmlContent.value = "";
+    tocItems.value = [];
   } finally {
     isLoading.value = false;
   }
@@ -129,42 +109,76 @@ onMounted(() => {
 </script>
 
 <template>
-  <section>
+  <section class="docs-section">
     <div class="columns is-multiline">
-      <div class="column is-3-desktop is-12-tablet">
-        <aside class="menu">
-          <p class="menu-label">
-            Dokumenty
-          </p>
-          <ul class="menu-list">
-            <li v-for="document in documents" :key="document.slug">
-              <a
-                  :class="{'is-active': selectedSlug === document.slug}"
-                  @click.prevent="loadDocument(document.slug)"
-                  href="#"
-              >
-                {{ document.title }}
-              </a>
-            </li>
-          </ul>
-        </aside>
+      <div class="column is-narrow">
+        <nav class="panel is-primary">
+          <a
+              v-for="document in documents" :key="document.slug"
+              :class="{'is-active': selectedSlug === document.slug}"
+              @click.prevent="loadDocument(document.slug)"
+              href="#"
+              class="panel-block"
+          >
+            <span class="panel-icon">
+              <i class="icon-file" aria-hidden="true"></i>
+            </span>
+            {{ document.title }}
+          </a>
+        </nav>
       </div>
-      <div class="column is-9-desktop is-12-tablet">
+      <div class="column">
+        <div class="content-header">
+          <button
+              class="button is-large is-info toc-button"
+              type="button"
+              @click="isTocVisible = !isTocVisible"
+          >
+
+            <i v-if="isTocVisible" class="icon-list-alt"></i>
+            <i v-if="!isTocVisible" class="icon-list-alt"></i>
+          </button>
+        </div>
         <div v-if="loadError" class="notification is-danger">
           {{ loadError }}
         </div>
         <div v-else-if="isLoading" class="has-text-centered">
           Ładowanie...
         </div>
-        <article v-else class="content" v-html="htmlContent" />
+        <article v-else class="content" v-html="htmlContent"/>
+      </div>
+      <div
+          v-if="isTocVisible"
+          class="column is-narrow"
+      >
+        <div class="toc-container">
+          <div class="toc-header">
+            <h2 class="toc-title">Spis treści</h2>
+          </div>
+          <nav v-if="tocItems.length" class="toc-list">
+            <a
+                v-for="item in tocItems"
+                :key="item.id"
+                class="toc-link"
+                :href="`#${item.id}`"
+                :style="{paddingLeft: `${(item.level - 1) * 12}px`}"
+            >
+              {{ item.text }}
+            </a>
+          </nav>
+          <p v-else class="toc-empty">Brak nagłówków w dokumencie.</p>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
+.docs-section {
+  padding-bottom: 2rem;
+}
+
 .menu-list a.is-active {
-  background-color: #485fc7;
   color: white;
 }
 
@@ -177,5 +191,71 @@ onMounted(() => {
 
 .menu-list a:hover {
   background-color: rgba(72, 95, 199, 0.15);
+}
+
+.content-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.toc-button {
+  position: fixed;
+  bottom: 3rem;
+}
+
+.toc-container {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.toc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.toc-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.toc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toc-link {
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-radius: 4px;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.toc-link:hover {
+  background-color: rgba(72, 95, 199, 0.1);
+}
+
+.toc-empty {
+  font-size: 0.875rem;
+  color: #7a7a7a;
+  margin: 0;
+}
+
+@media screen and (max-width: 1023px) {
+  .content-header {
+    justify-content: flex-start;
+  }
+
+  .toc-container {
+    position: relative;
+    top: auto;
+    max-height: none;
+  }
 }
 </style>
