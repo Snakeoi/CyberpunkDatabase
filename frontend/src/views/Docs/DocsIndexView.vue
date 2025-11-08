@@ -16,6 +16,26 @@ const renderMarkdownWithToc = (markdown) => {
   const headings = [];
   const slugCounts = new Map();
 
+  const extractPlainText = (tokens) => {
+    if (!Array.isArray(tokens)) {
+      return "";
+    }
+
+    return tokens
+        .map((token) => {
+          if (typeof token?.text === "string") {
+            return token.text;
+          }
+
+          if (Array.isArray(token?.tokens)) {
+            return extractPlainText(token.tokens);
+          }
+
+          return "";
+        })
+        .join("");
+  };
+
   const slugify = (value) => {
     const baseSlug = value
         .normalize("NFKD")
@@ -30,18 +50,22 @@ const renderMarkdownWithToc = (markdown) => {
     return occurrence ? `${baseSlug}-${occurrence}` : baseSlug;
   };
 
-  renderer.heading = (text, level, raw) => {
-    const headingText = (raw ?? text ?? "").toString();
-    const plainText = headingText.replace(/<[^>]*>/g, "").trim();
+  renderer.heading = (token) => {
+    const headingDepth = token?.depth ?? 1;
+    const headingText = token?.text ?? "";
+    const plainText = (extractPlainText(token?.tokens) || headingText)
+        .toString()
+        .trim();
     const slug = slugify(plainText);
+    const inlineHtml = marked.parseInline(headingText);
 
     headings.push({
       id: slug,
       text: plainText,
-      level,
+      level: headingDepth,
     });
 
-    return `<h${level} id="${slug}">${text}</h${level}>`;
+    return `<h${headingDepth} id="${slug}">${inlineHtml}</h${headingDepth}>`;
   };
 
   const html = marked.parse(markdown, {renderer});
