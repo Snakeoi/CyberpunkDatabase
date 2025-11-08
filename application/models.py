@@ -66,6 +66,12 @@ class Character(db.Model):
     def get_balance(self):
         return sum(entry.amount for entry in self.bank_account_entries)
 
+    def get_health_status(self):
+        if self.health > 0:
+            return f"{self.health}/{self.health_base()}"
+        else:
+            return "†"
+
     character_roles = db.relationship(
         'CharacterRole',
         back_populates='character',
@@ -200,8 +206,12 @@ class Character(db.Model):
             def get_character_roles_names(self, obj):
                 return cls.character_roles_names(obj)
 
+            def get_health_status(self, obj):
+                return cls.get_health_status(obj)
+
             id = ma.auto_field()
             name = ma.auto_field()
+            health_status = ma.Method('get_health_status')
             roles_list = ma.Method('get_character_roles_names')
 
         return CharacterGetAllSchema()

@@ -58,13 +58,19 @@ const openDetails = (row) => {
         :structure="[
           {
             key: 'name',
-            title: 'Name',
+            title: 'Nazwa',
             type: 'string',
             isSortable: true
           },
           {
             key: 'roles_list',
             title: 'Role',
+            type: 'string',
+            isSortable: true,
+          },
+          {
+            key: 'health_status',
+            title: 'Zdrowie',
             type: 'string',
             isSortable: true,
           }
