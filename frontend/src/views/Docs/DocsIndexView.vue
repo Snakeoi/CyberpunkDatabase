@@ -132,7 +132,7 @@ onMounted(() => {
       <div class="column is-12-tablet" :class="{'is-6-desktop': isTocVisible, 'is-9-desktop': !isTocVisible}">
         <div class="content-header">
           <button
-              class="button is-small is-light"
+              class="button is-small is-light toc-button"
               type="button"
               @click="isTocVisible = !isTocVisible"
           >
@@ -179,7 +179,6 @@ onMounted(() => {
 }
 
 .menu-list a.is-active {
-  background-color: #485fc7;
   color: white;
 }
 
@@ -200,15 +199,16 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
+.toc-button {
+  position: fixed;
+  bottom: 3rem;
+}
+
 .toc-container {
   position: sticky;
   top: 1rem;
   max-height: calc(100vh - 2rem);
-  padding: 1rem;
-  border: 1px solid #dbdbdb;
-  border-radius: 8px;
   overflow-y: auto;
-  background-color: white;
 }
 
 .toc-header {
@@ -231,7 +231,6 @@ onMounted(() => {
 }
 
 .toc-link {
-  color: #4a4a4a;
   text-decoration: none;
   padding: 0.25rem 0;
   border-radius: 4px;
