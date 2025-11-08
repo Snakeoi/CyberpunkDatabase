@@ -1,5 +1,6 @@
 <script setup>
 import {onMounted, ref} from "vue";
+import {marked} from "marked";
 import {readResource} from "@/assets/utils/axios/crud.js";
 
 const documents = ref([]);
@@ -7,93 +8,6 @@ const selectedSlug = ref(null);
 const htmlContent = ref("");
 const isLoading = ref(false);
 const loadError = ref(null);
-
-const convertMarkdownToHtml = (markdown) => {
-  const escapeHtml = (value) =>
-    value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
-
-  const applyInlineFormatting = (value) => {
-    let formatted = escapeHtml(value);
-    formatted = formatted.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    formatted = formatted.replace(/\*(.+?)\*/g, "<em>$1</em>");
-    formatted = formatted.replace(/`(.+?)`/g, "<code>$1</code>");
-    return formatted;
-  };
-
-  const lines = markdown.split(/\r?\n/);
-  const htmlLines = [];
-  let inUnorderedList = false;
-  let inOrderedList = false;
-
-  const closeLists = () => {
-    if (inUnorderedList) {
-      htmlLines.push("</ul>");
-      inUnorderedList = false;
-    }
-    if (inOrderedList) {
-      htmlLines.push("</ol>");
-      inOrderedList = false;
-    }
-  };
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (!trimmed) {
-      closeLists();
-      continue;
-    }
-
-    if (trimmed.startsWith("### ")) {
-      closeLists();
-      htmlLines.push(`<h3>${applyInlineFormatting(trimmed.slice(4))}</h3>`);
-      continue;
-    }
-
-    if (trimmed.startsWith("## ")) {
-      closeLists();
-      htmlLines.push(`<h2>${applyInlineFormatting(trimmed.slice(3))}</h2>`);
-      continue;
-    }
-
-    if (trimmed.startsWith("# ")) {
-      closeLists();
-      htmlLines.push(`<h1>${applyInlineFormatting(trimmed.slice(2))}</h1>`);
-      continue;
-    }
-
-    if (/^(\*|\+|-)\s+/.test(trimmed)) {
-      if (!inUnorderedList) {
-        closeLists();
-        htmlLines.push("<ul>");
-        inUnorderedList = true;
-      }
-      const content = trimmed.replace(/^(\*|\+|-)\s+/, "");
-      htmlLines.push(`<li>${applyInlineFormatting(content)}</li>`);
-      continue;
-    }
-
-    if (/^\d+\.\s+/.test(trimmed)) {
-      if (!inOrderedList) {
-        closeLists();
-        htmlLines.push("<ol>");
-        inOrderedList = true;
-      }
-      const content = trimmed.replace(/^\d+\.\s+/, "");
-      htmlLines.push(`<li>${applyInlineFormatting(content)}</li>`);
-      continue;
-    }
-
-    closeLists();
-    htmlLines.push(`<p>${applyInlineFormatting(trimmed)}</p>`);
-  }
-
-  closeLists();
-  return htmlLines.join("\n");
-};
 
 const loadDocuments = async () => {
   loadError.value = null;
@@ -114,7 +28,7 @@ const loadDocument = async (slug) => {
   try {
     selectedSlug.value = slug;
     const response = await readResource(`/docs/${slug}`);
-    htmlContent.value = convertMarkdownToHtml(response.data.content ?? "");
+    htmlContent.value = marked.parse(response.data.content ?? "");
   } catch (error) {
     loadError.value = "Nie udało się pobrać treści dokumentu.";
     htmlContent.value = "";
