@@ -13,13 +13,27 @@ const isTocVisible = ref(true);
 
 const renderMarkdownWithToc = (markdown) => {
   const renderer = new marked.Renderer();
-  const slugger = new marked.Slugger();
   const headings = [];
+  const slugCounts = new Map();
+
+  const slugify = (value) => {
+    const baseSlug = value
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .trim()
+        .replace(/\s+/g, "-") || "section";
+
+    const occurrence = slugCounts.get(baseSlug) ?? 0;
+    slugCounts.set(baseSlug, occurrence + 1);
+    return occurrence ? `${baseSlug}-${occurrence}` : baseSlug;
+  };
 
   renderer.heading = (text, level, raw) => {
     const headingText = (raw ?? text ?? "").toString();
     const plainText = headingText.replace(/<[^>]*>/g, "").trim();
-    const slug = slugger.slug(plainText);
+    const slug = slugify(plainText);
 
     headings.push({
       id: slug,
