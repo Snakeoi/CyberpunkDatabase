@@ -13,15 +13,20 @@ const isTocVisible = ref(true);
 
 const renderMarkdownWithToc = (markdown) => {
   const renderer = new marked.Renderer();
+  const slugger = new marked.Slugger();
   const headings = [];
 
-  renderer.heading = (text, level, raw, slugger) => {
-    const slug = slugger.slug(raw);
+  renderer.heading = (text, level, raw) => {
+    const headingText = (raw ?? text ?? "").toString();
+    const plainText = headingText.replace(/<[^>]*>/g, "").trim();
+    const slug = slugger.slug(plainText);
+
     headings.push({
       id: slug,
-      text: raw,
+      text: plainText,
       level,
     });
+
     return `<h${level} id="${slug}">${text}</h${level}>`;
   };
 
