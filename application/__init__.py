@@ -33,6 +33,7 @@ def create_app(mode="basic"):
             "role": ("role",),
             "character_generator": ("character_generator",),
             "bank": ("bank",),
+            "docs": ("docs",),
         },
     )
 

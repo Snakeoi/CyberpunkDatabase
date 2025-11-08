@@ -9,6 +9,7 @@ import SkillDetailView from "@/views/Abilities/SkillDetailView.vue";
 import SkillIndexView from "@/views/Abilities/SkillIndexView.vue";
 import CharacterGenerateView from "@/views/Character/CharacterGenerateView.vue";
 import CharacterPrintableView from "@/views/Character/CharacterPrintableView.vue";
+import DocsIndexView from "@/views/Docs/DocsIndexView.vue";
 
 
 const router = createRouter({
@@ -62,6 +63,11 @@ const router = createRouter({
           path: 'skill/new/',
           name: 'skill-add',
           component: SkillCreateView,
+        },
+        {
+          path: 'docs',
+          name: 'docs-index',
+          component: DocsIndexView,
         },
       ]
     },

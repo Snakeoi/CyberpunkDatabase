@@ -12,6 +12,11 @@ const links = ref([
     text: 'Umiejętności',
     icon: 'icon-users',
     routeName: 'skill-index'
+  },
+  {
+    text: 'Dokumentacja',
+    icon: 'icon-book',
+    routeName: 'docs-index'
   }
 ]);
 
