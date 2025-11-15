@@ -6,16 +6,17 @@ import {useUserStore} from "@/stores/user.js";
 import Toaster from "@/components/Toaster.vue";
 
 const userStore = useUserStore();
-const { data, error } = userStore;
+const { data, loading, error, fetchUserData } = userStore;
 
+onMounted(() => {
+  fetchUserData();
+});
 </script>
 
 <template>
   <Menu/>
   <Toaster/>
-  <div class="container is-fluid">
-    <RouterView />
-  </div>
+  <RouterView />
 </template>
 
 <style scoped>

@@ -1,12 +1,13 @@
 <script setup>
 
-import {sheetModes} from "@/enums.js";
+import {sheetModesEnum} from "@/enums.js";
 import DataTable from "@/components/common/data_table/DataTable.vue";
 import SearchInput from "@/components/common/SearchInput.vue";
 import {useToasterStore} from "@/stores/toaster.js";
 import {useRoute} from "vue-router";
 import {createResource, readResource} from "@/assets/utils/axios/crud.js";
 import {computed, onMounted, ref} from "vue";
+import UnfoldableCard from "@/components/common/UnfoldableCard.vue";
 
 const toasterStore = useToasterStore();
 const route = useRoute();
@@ -18,7 +19,7 @@ const props = defineProps({
   },
   sheetMode: {
     type: String,
-    default: sheetModes.play
+    default: sheetModesEnum.play
   }
 });
 
@@ -71,31 +72,32 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="field" v-if="sheetMode === sheetModes.edit">
-    <label class="label">Dodaj rolę</label>
-    <div class="my-3">
-      <SearchInput v-model="rolesSerach"/>
+  <UnfoldableCard title="Dodaj role" v-if="sheetMode === sheetModesEnum.edit">
+    <div class="field">
+      <div class="my-3">
+        <SearchInput v-model="rolesSerach"/>
+      </div>
+      <DataTable
+          :storageName="'skills'"
+          :data="filteredRoles"
+          :onRowClick="addCharacterRole"
+          :structure="[
+                    {
+                      key: 'name',
+                      title: 'Nazwa',
+                      type: 'string',
+                      isSortable: true
+                    },
+                    {
+                      key: 'special_ability',
+                      title: 'Zdolność specjalna',
+                      type: 'string',
+                      isSortable: true
+                    },
+                  ]"
+      />
     </div>
-    <DataTable
-        :storageName="'skills'"
-        :data="filteredRoles"
-        :onRowClick="addCharacterRole"
-        :structure="[
-                  {
-                    key: 'name',
-                    title: 'Nazwa',
-                    type: 'string',
-                    isSortable: true
-                  },
-                  {
-                    key: 'special_ability',
-                    title: 'Zdolność specjalna',
-                    type: 'string',
-                    isSortable: true
-                  },
-                ]"
-    />
-  </div>
+  </UnfoldableCard>
 </template>
 
 <style scoped>

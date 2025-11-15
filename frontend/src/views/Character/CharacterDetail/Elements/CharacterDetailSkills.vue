@@ -1,6 +1,6 @@
 <script setup>
 
-import {sheetModes} from "@/enums.js";
+import {sheetModesEnum} from "@/enums.js";
 import {computed, ref} from "vue";
 import {deleteResource, updateResource} from "@/assets/utils/axios/crud.js";
 import {useToasterStore} from "@/stores/toaster.js";
@@ -16,7 +16,7 @@ const props = defineProps({
   },
   sheetMode: {
     type: String,
-    default: sheetModes.play
+    default: sheetModesEnum.play
   }
 });
 
@@ -66,39 +66,41 @@ const deleteCharacterSkill = async (skill) => {
 <template>
 <h2 class="title is-4">Umiejętności</h2>
 <p class="has-text-right">Koszt umiejętności: <b>{{ summarySkillsCost }}</b></p>
-<table class="table is-fullwidth">
-  <thead>
-  <tr>
-    <th>Nazwa</th>
-    <th>Dziedziczy</th>
-    <th>Poziom</th>
-    <th>Cecha</th>
-    <th>Baza</th>
-    <th v-if="[sheetModes.edit, sheetModes.deleting].includes(sheetMode)">Akcje</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr v-for="skill in orderedCharacterSkills">
-    <td>
-      {{ skill.skill.name }}
-      <span v-if="skill.skill.cost_multiplier > 1" class="has-text-warning">
-        (x{{ skill.skill.cost_multiplier }})
-      </span>
-    </td>
-    <td>{{ skill.skill.inherit.toUpperCase() }}</td>
-    <td>{{ skill.level }}</td>
-    <td>{{ skill.ability_level }}</td>
-    <td><b>{{ skill.base }}</b></td>
-    <td v-if="sheetMode === sheetModes.edit" class="has-text-primary">
-      <i @click=updateCharacterSkill(skill,-1) class="icon-minus-square is-clickable pr-4"></i>
-      <i @click=updateCharacterSkill(skill,1) class="icon-plus-square is-clickable"></i>
-    </td>
-    <td v-if="sheetMode === sheetModes.deleting" class="has-text-danger">
-      <i @click=deleteCharacterSkill(skill) class="icon-trash is-clickable"></i>
-    </td>
-  </tr>
-  </tbody>
-</table>
+<div class="table-container">
+  <table class="table is-fullwidth">
+    <thead>
+    <tr>
+      <th>Nazwa</th>
+      <th>Dziedziczy</th>
+      <th>Poziom</th>
+      <th>Cecha</th>
+      <th>Baza</th>
+      <th v-if="[sheetModesEnum.edit, sheetModesEnum.deleting].includes(sheetMode)">Akcje</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr v-for="skill in orderedCharacterSkills">
+      <td>
+        {{ skill.skill.name }}
+        <span v-if="skill.skill.cost_multiplier > 1" class="has-text-warning">
+          (x{{ skill.skill.cost_multiplier }})
+        </span>
+      </td>
+      <td>{{ skill.skill.inherit.toUpperCase() }}</td>
+      <td>{{ skill.level }}</td>
+      <td>{{ skill.ability_level }}</td>
+      <td><b>{{ skill.base }}</b></td>
+      <td v-if="sheetMode === sheetModesEnum.edit" class="has-text-primary">
+        <i @click=updateCharacterSkill(skill,-1) class="icon-minus-square is-size-2 has-text-danger is-clickable pr-4"></i>
+        <i @click=updateCharacterSkill(skill,1) class="icon-plus-square is-size-2 has-text-success is-clickable"></i>
+      </td>
+      <td v-if="sheetMode === sheetModesEnum.deleting" class="has-text-danger">
+        <i @click=deleteCharacterSkill(skill) class="icon-trash is-clickable is-size-2"></i>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
 </template>
 
 <style scoped>

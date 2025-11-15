@@ -6,6 +6,7 @@ import re
 
 from flask import Blueprint, abort, current_app, jsonify
 
+from application.utils.decorators import permission_required_api
 
 docs = Blueprint("docs", __name__, url_prefix="/api/docs")
 
@@ -36,6 +37,7 @@ def _list_markdown_files(directory: str) -> list[dict[str, str]]:
 
 
 @docs.get("/")
+@permission_required_api()
 def list_docs():
     """Return a list of available markdown documents."""
     directory = _docs_directory()
@@ -44,6 +46,7 @@ def list_docs():
 
 
 @docs.get("/<string:slug>")
+@permission_required_api()
 def get_doc(slug: str):
     """Return the markdown content of a specific document."""
     if not _DOC_SLUG_PATTERN.match(slug):

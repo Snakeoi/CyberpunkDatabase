@@ -1,6 +1,6 @@
 <script setup>
 import {onBeforeMount, onMounted, ref, watch} from "vue";
-import {sheetModes} from "@/enums.js";
+import {sheetModesEnum} from "@/enums.js";
 
 const props = defineProps({
   heading: {
@@ -58,18 +58,18 @@ const changeValue = (diff) => {
 </script>
 
 <template>
-<div class="level-item has-text-centered">
-  <div>
+<div class="p-3">
+  <div class="is-flex is-flex-direction-column is-align-items-center">
     <p class="heading">{{ heading }}</p>
     <p class="title is-4" :class="props.class">{{ inputValue + pendingValue }}</p>
     <span v-if="props.editableAt.includes(sheetMode)" @mouseleave="emitValue" class="has-text-primary">
       <i
         @click="changeValue(-1)"
-        class="icon-minus-square is-clickable pr-4">
+        class="icon-minus-square is-clickable has-text-danger is-size-2 pr-4">
       </i>
       <i
         @click="changeValue(1)"
-        class="icon-plus-square is-clickable">
+        class="icon-plus-square is-clickable has-text-success is-size-2">
       </i>
     </span>
   </div>

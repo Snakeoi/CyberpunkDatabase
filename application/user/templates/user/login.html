@@ -1,0 +1,46 @@
+{% extends 'user/auth_layout.html' %}
+
+{% block title %}Logowanie{% endblock %}
+
+{% block form %}
+    <header class="card-header">
+        <p class="card-header-title">Logowanie</p>
+    </header>
+    <form method="post">
+        <div class="card-content">
+            {{ form.hidden_tag() }}
+            <p class="control has-icons-left mb-3">
+                {{ form.email(class="input", placeholder="Email") }}
+                <span class="icon is-small is-left">
+                  <i class="icon-envelope"></i>
+                </span>
+            </p>
+            <p class="control has-icons-left mb-3">
+                {{ form.password(class="input", placeholder="Hasło") }}
+                <span class="icon is-small is-left">
+                  <i class="icon-lock"></i>
+                </span>
+            </p>
+            <div class="mb-5">
+                <label class="label">
+                    {{ form.remember_me(class="checkbox") }}
+                    {{ form.remember_me.label.text }}
+                </label>
+            </div>
+            <div class="mb-5">
+                {% include 'elements/flash_messages.html' %}
+            </div>
+            <a href="{{ url_for('user_auth.reset_password') }}">Zapomniałeś hasła?</a>
+        </div>
+        <footer class="card-footer">
+            <button class="card-footer-item has-text-link">Zaloguj</button>
+            {% if config['EVERYONE_CAN_REGISTER'] %}
+                <p class="card-footer-item">
+                    <span>
+                        Przejdź do <a href="{{ url_for('user_auth.register') }}">rejestracji</a>
+                    </span>
+                </p>
+            {% endif %}
+        </footer>
+    </form>
+{% endblock %}

@@ -10,7 +10,7 @@ from application.models import Skills
 from application.models import CharacterSkills
 from application.models import Role
 from application.models import CharacterRole
-from ..utils.decorators import handle_ma_validation_errors
+from ..utils.decorators import handle_ma_validation_errors, permission_required_api
 
 ROLES_MAP = {
     'rocker': 'Rocker',
@@ -29,7 +29,8 @@ ROLES_MAP = {
 class CharacterGeneratorView(MethodView):
 
     decorators = [
-        handle_ma_validation_errors
+        handle_ma_validation_errors,
+        permission_required_api()
     ]
 
     def get(self):

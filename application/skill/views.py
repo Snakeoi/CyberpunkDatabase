@@ -2,37 +2,37 @@ from flask import request, jsonify
 from flask.views import MethodView
 from application import models
 from application.utils import CommonCRUD
-from application.utils.decorators import handle_ma_validation_errors
+from application.utils.decorators import handle_ma_validation_errors, permission_required_api
 from application.utils.schema_serialization import serialize_schema
 from application.extensions import socketio
 
 
 class SkillPostSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.Skills.post_schema()))
 
 class SkillPatchSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.Skills.patch_schema()))
 
 class CharacterSkillPostSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.CharacterSkills.post_schema()))
 
 class CharacterSkillPatchSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.CharacterSkills.patch_schema()))
 
 class SkillIndexView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return CommonCRUD.get_all(
@@ -49,7 +49,7 @@ class SkillIndexView(MethodView):
         )
 
 class SkillDetailView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind):
         return CommonCRUD.get_one(
@@ -71,7 +71,7 @@ class SkillDetailView(MethodView):
         )
 
 class CharacterSkillIndexView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind):
         return CommonCRUD.get_all(
@@ -97,7 +97,7 @@ class CharacterSkillIndexView(MethodView):
         return response, status
 
 class CharacterSkillDetailView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind, skill_id):
         return CommonCRUD.get_one(

@@ -1,0 +1,18 @@
+APP_NAME='Flavia'
+
+SECRET_KEY = 'v3rysecret'
+JWT_SECRET_KEY = 'v3rysecret'
+
+SQLALCHEMY_DATABASE_URI = "sqlite:///app.db"
+
+MAIL_USERNAME = 'cyberpunk@januszskotarczak.pl'
+MAIL_SERVER = 'mail.januszskotarczak.pl'
+MAIL_PORT = 587
+MAIL_PASSWORD = '5KHYRkTkgiA)5%QV'
+MAIL_USE_TLS = false
+
+EVERYONE_CAN_REGISTER = true
+
+# Uncomment the following lines in config.test.toml
+# TESTING = true
+# WTF_CSRF_ENABLED = false

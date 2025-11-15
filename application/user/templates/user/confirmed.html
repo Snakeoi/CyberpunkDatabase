@@ -1,0 +1,29 @@
+{% extends 'user/auth_layout.html' %}
+
+{% block title %}Potwierdzenie rejestracji{% endblock %}
+
+{% block form %}
+    <header class="card-header">
+        <p class="card-header-title">Potwierdzenie rejestracji</p>
+    </header>
+    <div class="card-content">
+        {% if success %}
+        <div class="notification is-primary">
+            <h1 class="title">Potwierdzono :)</h1>
+            Konto zostało potwierdzone!
+        </div>
+        {% else %}
+        <div class="notification is-warning">
+            <h1 class="title">Konto niepotwierdzone <i class="icon-frown-o"></i> </h1>
+            Token wygasł lub jest nieprawidłowy.
+        </div>
+        {% endif %}
+    </div>
+    <footer class="card-footer">
+        <p class="card-footer-item">
+            <span>
+                Przejdź do <a href="{{ url_for('user_auth.login') }}">Zaloguj</a>
+            </span>
+        </p>
+    </footer>
+{% endblock %}

@@ -4,7 +4,7 @@ import {computed, onBeforeMount, ref, watch} from "vue";
 import {useRoute} from 'vue-router'
 import ConditionalLoader from "@/components/loader/ConditionalLoader.vue";
 import {useToasterStore} from "@/stores/toaster.js";
-import {sheetModes} from "@/enums.js";
+import {sheetModesEnum} from "@/enums.js";
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import CharacterDetailTabs from "@/views/Character/CharacterDetail/Elements/CharacterDetailTabs.vue";
 import { io } from "socket.io-client";
@@ -47,7 +47,7 @@ const isLoading = ref(true);
 const character = ref({});
 const characterOriginal = ref({});
 
-const sheetMode = ref(sheetModes.play);
+const sheetMode = ref(sheetModesEnum.play);
 
 const isCharacterChanged = computed(() => {
   return JSON.stringify(character.value) !== JSON.stringify(characterOriginal.value)
@@ -114,9 +114,13 @@ const updateCharacter = async () => {
 
 <template>
   <ConditionalLoader :is-loading="isLoading">
-    <CharacterDetailModes v-model="sheetMode"/>
+
+    <div class="buttons is-right">
+      <RouterLink :to="{name: 'character-print', id: route.params.id}" class="button">
+        <i class="icon-print mr-3" aria-hidden="true"></i>Drukuj
+      </RouterLink>
+    </div>
     <CharacterDetailName :character="character" :sheetMode="sheetMode"/>
-    <CharacterDetailDelete :character="character" :sheetMode="sheetMode"/>
     <CharacterDetailTabs :tabs="tabs" v-model="activeTab"/>
 
 
@@ -125,14 +129,10 @@ const updateCharacter = async () => {
     </div>
 
     <div v-if="activeTab === tabs[1]">
+      <CharacterDetailModes v-model="sheetMode"/>
+      <CharacterDetailDelete :character="character" :sheetMode="sheetMode"/>
       <CharacterDetailAbilities :character="character" :sheetMode="sheetMode"/>
       <div class="columns">
-        <div class="column">
-          <div class="box">
-            <CharacterDetailSkills :character="character" :sheetMode="sheetMode"/>
-            <CharacterDetailSkillsAdd :character="character" :sheetMode="sheetMode"/>
-          </div>
-        </div>
         <div class="column">
           <div class="box">
             <CharacterDetailMentalHealth :character="character" :sheetMode="sheetMode"/>
@@ -143,6 +143,12 @@ const updateCharacter = async () => {
           <div class="box">
             <CharacterDetailRoles :character="character" :sheetMode="sheetMode"/>
             <CharacterDetailsRolesAdd :character="character" :sheetMode="sheetMode"/>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box">
+            <CharacterDetailSkills :character="character" :sheetMode="sheetMode"/>
+            <CharacterDetailSkillsAdd :character="character" :sheetMode="sheetMode"/>
           </div>
         </div>
       </div>

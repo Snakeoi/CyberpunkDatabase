@@ -6,6 +6,7 @@ import DataTable from "@/components/common/data_table/DataTable.vue";
 import router from "@/router/index.js";
 import {adminSettingsViewsStore} from "@/stores/adminSettingsViews.js";
 import ConditionalLoader from "@/components/loader/ConditionalLoader.vue";
+import {abilitiesEnum} from "@/enums.js";
 
 const isLoading = ref(true);
 const skillSettingsViews = adminSettingsViewsStore();
@@ -61,13 +62,15 @@ const openDetails = (row) => {
             key: 'inherit',
             title: 'Zdolność',
             type: 'string',
-            isSortable: true
+            isSortable: true,
+            processor: value => abilitiesEnum[value],
           },
           {
             key: 'cost_multiplier',
             title: 'Mnożnik kosztu',
             type: 'string',
-            isSortable: true
+            isSortable: true,
+            processor: value => `x${value}`,
           },
         ]"
     />

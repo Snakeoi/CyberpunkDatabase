@@ -1,6 +1,6 @@
 <script setup>
 
-import {sheetModes} from "@/enums.js";
+import {sheetModesEnum} from "@/enums.js";
 import {deleteResource, updateResource} from "@/assets/utils/axios/crud.js";
 import {useToasterStore} from "@/stores/toaster.js";
 import {useRoute} from "vue-router";
@@ -16,7 +16,7 @@ const props = defineProps({
   },
   sheetMode: {
     type: String,
-    default: sheetModes.play
+    default: sheetModesEnum.play
   }
 });
 
@@ -58,13 +58,14 @@ const deleteCharacterRole = async (role) => {
 
 <template>
   <h2 class="title is-4">Role</h2>
+  <div class="table-container">
   <table class="table is-fullwidth">
     <thead>
     <tr>
       <th>Nazwa</th>
       <th>Zdolność specjalna</th>
       <th>Poziom</th>
-      <th v-if="[sheetModes.edit, sheetModes.deleting].includes(sheetMode)">Akcje</th>
+      <th v-if="[sheetModesEnum.edit, sheetModesEnum.deleting].includes(sheetMode)">Akcje</th>
     </tr>
     </thead>
     <tbody>
@@ -72,16 +73,17 @@ const deleteCharacterRole = async (role) => {
       <td>{{ role.role.name }}</td>
       <td>{{ role.role.special_ability }}</td>
       <td><b>{{ role.level }}</b></td>
-      <td v-if="sheetMode === sheetModes.edit" class="has-text-primary">
-        <i @click=updateCharacterRole(role,-1) class="icon-minus-square is-clickable pr-4"></i>
-        <i @click=updateCharacterRole(role,1) class="icon-plus-square is-clickable"></i>
+      <td v-if="sheetMode === sheetModesEnum.edit">
+        <i @click=updateCharacterRole(role,-1) class="icon-minus-square is-size-2 has-text-danger is-clickable pr-4"></i>
+        <i @click=updateCharacterRole(role,1) class="icon-plus-square is-size-2 has-text-success is-clickable"></i>
       </td>
-      <td v-if="sheetMode === sheetModes.deleting" class="has-text-danger">
-        <i @click=deleteCharacterRole(role) class="icon-trash is-clickable"></i>
+      <td v-if="sheetMode === sheetModesEnum.deleting" class="has-text-danger">
+        <i @click=deleteCharacterRole(role) class="icon-trash is-size-2 is-clickable"></i>
       </td>
     </tr>
     </tbody>
   </table>
+  </div>
 </template>
 
 <style scoped>

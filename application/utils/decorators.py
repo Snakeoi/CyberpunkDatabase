@@ -1,7 +1,41 @@
 from functools import wraps
 
-from flask import jsonify
+from flask import abort, jsonify
+from flask_login import login_required, current_user
+from flask_login.mixins import AnonymousUserMixin
 from marshmallow import ValidationError
+
+
+def permission_required(*permissions: str):
+    def decorator(func):
+        @wraps(func)
+        @login_required
+        def wrapper(*args, **kwargs):
+            if current_user.have_permission(*permissions):
+                return func(*args, **kwargs)
+            else:
+                abort(403)
+
+        return wrapper
+
+    return decorator
+
+
+def permission_required_api(*permissions: str):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if isinstance(current_user, AnonymousUserMixin):
+                abort(401)
+            else:
+                if current_user.have_permission(*permissions):
+                    return func(*args, **kwargs)
+                else:
+                    abort(403)
+
+        return wrapper
+
+    return decorator
 
 
 def handle_ma_validation_errors(func):

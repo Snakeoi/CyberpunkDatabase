@@ -2,25 +2,25 @@ from flask import request, jsonify
 from flask.views import MethodView
 from application import models
 from application.utils import CommonCRUD
-from application.utils.decorators import handle_ma_validation_errors
+from application.utils.decorators import handle_ma_validation_errors, permission_required_api
 from application.utils.schema_serialization import serialize_schema
 from application.extensions import socketio
 
 
 class CharacterPostSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.Character.post_schema()))
 
 class CharacterPatchSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.Character.patch_schema()))
 
 class CharactersIndexView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return CommonCRUD.get_all(
@@ -45,7 +45,7 @@ class CharactersIndexView(MethodView):
         return response, status
 
 class CharacterDetailView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind):
         return CommonCRUD.get_one(

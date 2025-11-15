@@ -1,6 +1,6 @@
 <script setup>
 
-import {sheetModes} from "@/enums.js";
+import {sheetModesEnum} from "@/enums.js";
 import {ref} from "vue";
 import {deleteResource} from "@/assets/utils/axios/crud.js";
 import router from "@/router/index.js";
@@ -17,7 +17,7 @@ const props = defineProps({
   },
   sheetMode: {
     type: String,
-    default: sheetModes.play
+    default: sheetModesEnum.play
   }
 });
 
@@ -42,7 +42,7 @@ const deleteCharacter = async () => {
 </script>
 
 <template>
-<div class="box" v-if="sheetMode === sheetModes.deleting">
+<div class="box" v-if="sheetMode === sheetModesEnum.deleting">
   <div class="field has-addons">
     <div class="control">
       <input class="input"

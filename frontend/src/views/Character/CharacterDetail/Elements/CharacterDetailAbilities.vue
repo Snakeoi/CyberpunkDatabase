@@ -3,6 +3,7 @@
 import Abilities from "@/components/character/Abilities.vue";
 import Ability from "@/components/character/Ability.vue";
 import {computed} from "vue";
+import {abilitiesEnum} from "@/enums.js";
 
 const props = defineProps({
   character: {
@@ -27,15 +28,15 @@ const characterAbilitiesCost = computed(() => {
 <template>
 <div class="box">
   <Abilities>
-    <Ability v-model="character.int" :sheetMode=sheetMode heading="INT"/>
-    <Ability v-model="character.ref" :sheetMode=sheetMode heading="REF"/>
-    <Ability v-model="character.dex" :sheetMode=sheetMode heading="ZW"/>
-    <Ability v-model="character.tech" :sheetMode=sheetMode heading="TECH"/>
-    <Ability v-model="character.cool" :sheetMode=sheetMode heading="CHA"/>
-    <Ability v-model="character.will" :sheetMode=sheetMode heading="SW"/>
-    <Ability v-model="character.body" :sheetMode=sheetMode heading="BC"/>
-    <Ability v-model="character.luck" :sheetMode=sheetMode heading="SZ"/>
-    <Ability v-model="character.move" :sheetMode=sheetMode heading="RUCH"/>
+    <Ability v-model="character.int" :sheetMode=sheetMode :heading="abilitiesEnum.int"/>
+    <Ability v-model="character.ref" :sheetMode=sheetMode :heading="abilitiesEnum.ref"/>
+    <Ability v-model="character.dex" :sheetMode=sheetMode :heading="abilitiesEnum.dex"/>
+    <Ability v-model="character.tech" :sheetMode=sheetMode :heading="abilitiesEnum.tech"/>
+    <Ability v-model="character.cool" :sheetMode=sheetMode :heading="abilitiesEnum.cool"/>
+    <Ability v-model="character.will" :sheetMode=sheetMode :heading="abilitiesEnum.will"/>
+    <Ability v-model="character.body" :sheetMode=sheetMode :heading="abilitiesEnum.body"/>
+    <Ability v-model="character.luck" :sheetMode=sheetMode :heading="abilitiesEnum.luck"/>
+    <Ability v-model="character.move" :sheetMode=sheetMode :heading="abilitiesEnum.move"/>
   </Abilities>
   <p class="has-text-centered">Koszt zdolności: <b>{{ characterAbilitiesCost }}</b></p>
 </div>

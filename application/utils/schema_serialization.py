@@ -63,7 +63,6 @@ def serialize_requirements(validator: Any) -> dict[str, Any]:
             "error": v.error,
         },
     }
-
     serialize = serializers.get(type(validator), None)
     if serialize is None:
         raise UnsupportedValidatorError(validator)
@@ -74,11 +73,11 @@ def serialize_requirements(validator: Any) -> dict[str, Any]:
 def serialize_field_type(field: Any) -> str:
     serializers = {
         fields.Raw: "Raw",
-        # fields.Nested: "Nested",
+        fields.Nested: "Nested",
         fields.Mapping: "Mapping",
         fields.Dict: "Dict",
-        # fields.List: "List",
-        # fields.Tuple: "Tuple",
+        fields.List: "List",
+        fields.Tuple: "Tuple",
         fields.String: "String",
         fields.UUID: "UUID",
         fields.Number: "Number",
@@ -101,14 +100,14 @@ def serialize_field_type(field: Any) -> str:
         fields.IPInterface: "IPInterface",
         fields.IPv4Interface: "IPv4Interface",
         fields.IPv6Interface: "IPv6Interface",
-        # fields.Enum: "Enum",
+        fields.Enum: "Enum",
         fields.Method: "Method",
         fields.Function: "Function",
         fields.Str: "String",
         fields.Bool: "Boolean",
         fields.Int: "Integer",
-        # fields.Constant: "Constant",
-        # fields.Pluck: "Pluck",
+        fields.Constant: "Constant",
+        fields.Pluck: "Pluck",
     }
     serialize = serializers.get(type(field), None)
     if serialize is None:
@@ -120,10 +119,12 @@ def serialize_field_type(field: Any) -> str:
 def serialize_schema(schema: Schema):
     result = {}
     for key, value in schema.fields.items():
-        if isinstance(value.validate, list):
-            validators = [serialize_requirements(validator) for validator in value.validate]
-        else:
-            validators = serialize_requirements(value.validate)
+        validators = []
+        if value.validate is not None:
+            if isinstance(value.validate, list):
+                validators.extend(serialize_requirements(validator) for validator in value.validate)
+            else:
+                validators.append(serialize_requirements(value.validate))
 
         result[key] = {
             "name": key,

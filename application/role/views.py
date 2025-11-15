@@ -2,37 +2,37 @@ from flask import request, jsonify
 from flask.views import MethodView
 from application import models
 from application.utils import CommonCRUD
-from application.utils.decorators import handle_ma_validation_errors
+from application.utils.decorators import handle_ma_validation_errors, permission_required_api
 from application.utils.schema_serialization import serialize_schema
 from application.extensions import socketio
 
 
 class RolePostSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.Role.post_schema()))
 
 class RolePatchSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.Role.patch_schema()))
 
 class CharacterRolePostSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.CharacterRole.post_schema()))
 
 class CharacterRolePatchSchemaView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return jsonify(serialize_schema(models.CharacterRole.patch_schema()))
 
 class RoleIndexView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self):
         return CommonCRUD.get_all(
@@ -49,7 +49,7 @@ class RoleIndexView(MethodView):
         )
 
 class RoleDetailView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind):
         return CommonCRUD.get_one(
@@ -71,7 +71,7 @@ class RoleDetailView(MethodView):
         )
 
 class CharacterRoleIndexView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind):
         return CommonCRUD.get_all(
@@ -97,7 +97,7 @@ class CharacterRoleIndexView(MethodView):
         return response, status
 
 class CharacterRoleDetailView(MethodView):
-    decorators = [handle_ma_validation_errors]
+    decorators = [handle_ma_validation_errors, permission_required_api()]
 
     def get(self, ind, role_id):
         print(models.CharacterRole.query.filter_by(character_id=ind, id=role_id).all())

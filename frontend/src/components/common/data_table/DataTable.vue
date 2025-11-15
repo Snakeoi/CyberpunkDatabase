@@ -40,7 +40,8 @@ const props = defineProps({
         typeof item.key === 'string' &&
         typeof item.title === 'string' &&
         (typeof item.isSortable === 'undefined' || typeof item.isSortable === 'boolean' ) &&
-        ['string', 'checkmark', 'date', 'tagList'].includes(item.type) // Zastąp typami, które Cię interesują
+        ['string', 'checkmark', 'date', 'tagList'].includes(item.type) &&
+        typeof item.processor === 'function' || typeof item.processor === 'undefined'
       );
     }
   }
@@ -137,6 +138,13 @@ const setOrder = (key, isSortable) => {
   }
 }
 
+const applyProcessor = (row, col) => {
+  if (col.processor && typeof col.processor === 'function') {
+    return col.processor(row[col.key], row);
+  }
+  return row[col.key];
+}
+
 </script>
 
 <template>
@@ -152,10 +160,10 @@ const setOrder = (key, isSortable) => {
     <tbody>
       <tr v-for="row in orderedData" class="is-clickable">
         <td v-for="col in structure" @click="onRowClick(row)">
-          <span v-if="col.type === 'string'">{{ row[col.key] }}</span>
-          <span v-if="col.type === 'checkmark'"><BoolToCheckmark :value="row[col.key]"/></span>
-          <span v-if="col.type === 'date'">{{ formatDate(row[col.key]) }}</span>
-          <span v-if="col.type === 'tagList'"><TagList :tags="row[col.key]"/></span>
+          <span v-if="col.type === 'string'">{{ applyProcessor(row, col) }}</span>
+          <span v-if="col.type === 'checkmark'"><BoolToCheckmark :value="applyProcessor(row, col)"/></span>
+          <span v-if="col.type === 'date'">{{ formatDate(applyProcessor(row, col)) }}</span>
+          <span v-if="col.type === 'tagList'"><TagList :tags="applyProcessor(row, col)"/></span>
         </td>
       </tr>
     </tbody>
